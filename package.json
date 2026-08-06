@@ -1,0 +1,23 @@
+{
+  "name": "wikidle",
+  "version": "1.0.0",
+  "description": "Worlde-esque app for Wikipedia races.",
+  "homepage": "https://github.com/Chris-B33/wikidle#readme",
+  "bugs": {
+    "url": "https://github.com/Chris-B33/wikidle/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chris-B33/wikidle.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
