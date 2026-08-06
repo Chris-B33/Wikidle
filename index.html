@@ -1,13 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello TypeScript</title>
-</head>
-<body>
-  <div id="app"></div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script type="module" src="./dist/main.js"></script>
-</body>
+    <title>Wikidle</title>
+
+    <link rel="stylesheet" href="./src/style.css">
+  </head>
+
+  <body>
+    <header class="site-header">
+      <h1>Wikidle</h1>
+      <p>Race from one Wikipedia page to another.</p>
+    </header>
+
+    <!---------------
+       Start Screen 
+    ----------------->
+    <main id="start-screen" class="start-screen">
+      <div class="start-card">
+        <h2>Ready?</h2>
+        <p>
+          Race through Wikipedia from one article to another.
+          Find the shortest path you can.
+        </p>
+        <button id="start-button" class="start-button">Start Game</button>
+      </div>
+    </main>
+
+    <!---------------
+       Game Screen 
+    ----------------->
+    <main id="game-screen" class="game-screen hidden">
+      <section class="game-card goals-card">
+        <div class="goal">
+          <span class="goal-label">START</span>
+          <span id="start-page" class="page-name">Albert Einstein</span>
+        </div>
+
+        <div class="goal-arrow" aria-hidden="true">→</div>
+
+        <div class="goal goal-end">
+          <span class="goal-label">GOAL</span>
+          <span id="end-page" class="page-name">World War II</span>
+        </div>
+
+        <div class="timer">
+          <span class="timer-label">TIME</span>
+          <span id="timer">00:00</span>
+        </div>
+      </section>
+
+      <div class="game-content">
+        <section class="game-card wikipedia-card">
+          <div class="card-header">
+            <h2>Wikipedia</h2>
+          </div>
+
+          <div id="wikipedia-container" class="wikipedia-container">
+            <!-- Wikipedia article will be inserted here -->
+          </div>
+
+          <div class="navigation-buttons">
+            <button id="back-button" class="nav-button" disabled>
+              ← Back
+            </button>
+
+            <button id="forward-button" class="nav-button" disabled>
+              Forward →
+            </button>
+          </div>
+        </section>
+
+
+        <section class="game-card path-card">
+          <div class="card-header">
+            <h2>Your Path</h2>
+            <span id="step-count">1 step</span>
+          </div>
+
+          <div id="path" class="path-list">
+            <div class="path-item current">
+              <span class="path-number">1</span>
+              <span class="path-page">Albert Einstein</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="./dist/main.js"></script>
+  </body>
 </html>
