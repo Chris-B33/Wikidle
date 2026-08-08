@@ -499,28 +499,41 @@ body {
   font-size: 14px;
 }
 
-/* Mobile */
+/* MOBILE SCROLL OVERRIDE */
 
 @media (max-width: 700px) {
+  html,
+  body {
+    height: auto !important;
+    min-height: 100%;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
   .game-screen {
     width: calc(100% - 20px);
-    padding-top: 20px;
-  }
-
-  .goals-card {
-    grid-template-columns: 1fr auto 1fr;
-  }
-
-  .timer {
-    grid-column: 1 / -1;
-    padding: 10px 0 0;
-    border: 0;
-    border-top: 1px solid #ddd8cf;
-    text-align: center;
+    height: auto !important;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 20px 0 40px;
+    overflow: visible !important;
   }
 
   .game-content {
-    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .wikipedia-card {
+    height: auto;
+    overflow: hidden;
+  }
+
+  .wikipedia-container {
+    height: 500px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: auto;
   }
 
   .toc-card {
@@ -529,13 +542,7 @@ body {
 
   .table-of-contents {
     height: 180px;
-  }
-
-  .wikipedia-container {
-    height: 65vh;
-    min-height: 400px;
-    max-height: 650px;
-    padding: 20px;
+    overflow-y: auto;
   }
 
   .path-card {
@@ -544,38 +551,6 @@ body {
 
   .path-list {
     height: 150px;
-  }
-}
-
-@media (max-width: 500px) {
-  .completion-card {
-    padding: 24px 18px;
-  }
-
-  .completion-stats {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 400px) {
-  .start-screen {
-    margin-top: 40px;
-  }
-
-  .start-card {
-    padding: 30px 20px;
-  }
-
-  .goals-card {
-    gap: 8px;
-    padding: 14px;
-  }
-
-  .page-name {
-    font-size: 14px;
-  }
-
-  .wikipedia-container {
-    height: 380px;
+    overflow-y: auto;
   }
 }
