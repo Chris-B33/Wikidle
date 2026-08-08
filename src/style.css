@@ -501,44 +501,63 @@ body {
 
 /* MOBILE SCROLL OVERRIDE */
 @media screen and (max-width: 700px) {
+  html,
+  body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .game-screen {
+    width: calc(100% - 20px);
+    margin: 0 auto;
+    padding: 20px 0 40px;
+    overflow: visible;
+  }
+
   .game-content {
     display: flex !important;
     flex-direction: column !important;
-    grid-template-columns: none !important;
-    grid-template-rows: none !important;
-    width: 100% !important;
+    width: 100%;
+    gap: 16px;
+    overflow: visible;
   }
 
   .game-content .toc-card,
   .game-content .wikipedia-card,
   .game-content .path-card {
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 0 !important;
-    grid-column: auto !important;
-    grid-row: auto !important;
+    margin: 0;
   }
 
   .game-content .toc-card {
     height: auto !important;
-  }
-
-  .game-content .wikipedia-card {
-    height: auto !important;
-  }
-
-  .game-content .path-card {
-    height: auto !important;
+    overflow: hidden;
   }
 
   .game-content .table-of-contents {
     height: 180px;
+    overflow-y: auto;
+  }
+
+  .game-content .wikipedia-card {
+    height: auto !important;
+    overflow: hidden;
   }
 
   .game-content .wikipedia-container {
     height: 500px !important;
-    overflow-y: auto;
+    max-height: 500px !important;
     overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  .game-content .path-card {
+    height: auto !important;
+    overflow: hidden;
   }
 
   .game-content .path-list {
@@ -550,5 +569,6 @@ body {
 @media screen and (max-width: 400px) {
   .game-content .wikipedia-container {
     height: 380px !important;
+    max-height: 380px !important;
   }
 }
