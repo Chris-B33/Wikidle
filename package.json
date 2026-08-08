@@ -15,9 +15,12 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "generate-game": "tsx scripts/generate_game.ts"
   },
   "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsx": "^4.23.11",
     "typescript": "^5.9.3"
   }
 }

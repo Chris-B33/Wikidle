@@ -6,6 +6,7 @@ let timerInterval = null;
 let clicks = 0;
 let navigation;
 let loading = false;
+let dailyGame = null;
 const startScreen = document.querySelector("#start-screen");
 const gameScreen = document.querySelector("#game-screen");
 const tableOfContents = document.querySelector("#table-of-contents");
@@ -22,14 +23,62 @@ const completionScreen = document.querySelector("#completion-screen");
 const completionPathLength = document.querySelector("#completion-path-length");
 const completionClicks = document.querySelector("#completion-clicks");
 const completionTime = document.querySelector("#completion-time");
+const completionShortestPath = document.querySelector("#completion-shortest-path");
 const completionPathList = document.querySelector("#completion-path-list");
+async function loadDailyGame() {
+    const response = await fetch("./data/daily-game.json", {
+        cache: "no-cache"
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to load daily game: ${response.status}`);
+    }
+    const game = await response.json();
+    if (typeof game.date !== "string" ||
+        typeof game.start !== "string" ||
+        typeof game.goal !== "string" ||
+        typeof game.distance !== "number") {
+        throw new Error("Invalid daily-game.json");
+    }
+    return game;
+}
+async function initializeDailyGame() {
+    try {
+        dailyGame = await loadDailyGame();
+        if (startPageElement) {
+            startPageElement.textContent = dailyGame.start;
+        }
+        if (endPageElement) {
+            endPageElement.textContent = dailyGame.goal;
+        }
+        console.log(`Daily game loaded: ${dailyGame.start} → ${dailyGame.goal}`);
+    }
+    catch (error) {
+        console.error("Failed to load daily game:", error);
+        if (startPageElement) {
+            startPageElement.textContent = "Unable to load";
+        }
+        if (endPageElement) {
+            endPageElement.textContent = "today's game";
+        }
+    }
+}
 export async function startGame() {
     if (!startScreen || !gameScreen || !wikipediaContainer || !tableOfContents || !pathContainer || !stepCount || !backButton || !forwardButton) {
         return;
     }
-    const startPage = startPageElement?.textContent?.trim() || "Albert Einstein";
+    if (!dailyGame) {
+        await initializeDailyGame();
+    }
+    if (!dailyGame) {
+        console.error("Cannot start game: daily game unavailable.");
+        return;
+    }
+    const startPage = dailyGame.start;
     navigation = createNavigation(startPage);
     clicks = 0;
+    if (clickCount) {
+        clickCount.textContent = "0";
+    }
     startScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
     updatePath();
@@ -47,9 +96,12 @@ async function handleNewPage(title) {
     }
     addPage(navigation, title);
     clicks++;
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
+    }
     updatePath();
     const cur = title.trim().toLowerCase();
-    const goal = endPageElement?.textContent?.trim().toLowerCase();
+    const goal = dailyGame?.goal.trim().toLowerCase();
     if (cur === goal) {
         completeGame();
         return;
@@ -87,13 +139,16 @@ function updateTimer() {
     timer.textContent = formatTime(getElapsedTime());
 }
 async function navigateBack() {
-    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
+    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton || loading) {
         return;
     }
-    clicks++;
     const page = goBack(navigation);
     if (!page) {
         return;
+    }
+    clicks++;
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
     }
     updatePath();
     loading = true;
@@ -104,13 +159,16 @@ async function navigateBack() {
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
 async function navigateForward() {
-    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
+    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton || loading) {
         return;
     }
-    clicks++;
     const page = goForward(navigation);
     if (!page) {
         return;
+    }
+    clicks++;
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
     }
     updatePath();
     loading = true;
@@ -123,7 +181,7 @@ async function navigateForward() {
 function completeGame() {
     console.log("game completed.");
     stopTimer();
-    if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList) {
+    if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList || !completionShortestPath) {
         console.log("completion elements missing");
         return;
     }
@@ -132,6 +190,7 @@ function completeGame() {
     completionPathLength.textContent = String(pathLength);
     completionClicks.textContent = String(clicks);
     completionTime.textContent = formatTime(finalTime);
+    completionShortestPath.textContent = String(dailyGame?.distance ?? "?");
     completionPathList.innerHTML = "";
     navigation.history.forEach((page, index) => {
         const item = document.createElement("div");
@@ -156,3 +215,4 @@ function formatTime(milliseconds) {
 }
 backButton?.addEventListener("click", navigateBack);
 forwardButton?.addEventListener("click", navigateForward);
+initializeDailyGame();

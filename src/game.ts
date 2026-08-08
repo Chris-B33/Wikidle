@@ -1,26 +1,34 @@
 import {
-  loadWikipediaPage
+    loadWikipediaPage
 } from "./wikipedia.js";
 
 import {
-  createNavigation,
-  addPage,
-  goBack,
-  goForward,
-  updatePathDisplay,
-  updateNavigationButtons,
-  Navigation
+    createNavigation,
+    addPage,
+    goBack,
+    goForward,
+    updatePathDisplay,
+    updateNavigationButtons,
+    Navigation
 } from "./navigation.js";
 
-import { 
+import {
     buildTableOfContents
 } from "./toc.js";
+
+interface DailyGame {
+    date: string;
+    start: string;
+    goal: string;
+    distance: number;
+}
 
 let startTime = 0;
 let timerInterval: number | null = null;
 let clicks = 0;
 let navigation: Navigation;
 let loading = false;
+let dailyGame: DailyGame | null = null;
 
 const startScreen = document.querySelector<HTMLElement>("#start-screen");
 const gameScreen = document.querySelector<HTMLElement>("#game-screen");
@@ -41,20 +49,84 @@ const startPageElement = document.querySelector<HTMLElement>("#start-page");
 const endPageElement = document.querySelector<HTMLElement>("#end-page");
 
 const completionScreen = document.querySelector<HTMLElement>("#completion-screen");
-const completionPathLength = document.querySelector<HTMLElement>( "#completion-path-length" ); 
-const completionClicks = document.querySelector<HTMLElement>( "#completion-clicks" ); 
-const completionTime = document.querySelector<HTMLElement>( "#completion-time" ); 
-const completionPathList = document.querySelector<HTMLElement>( "#completion-path-list" );
+const completionPathLength = document.querySelector<HTMLElement>("#completion-path-length");
+const completionClicks = document.querySelector<HTMLElement>("#completion-clicks");
+const completionTime = document.querySelector<HTMLElement>("#completion-time");
+const completionShortestPath = document.querySelector<HTMLElement>("#completion-shortest-path");
+const completionPathList = document.querySelector<HTMLElement>("#completion-path-list");
+
+
+async function loadDailyGame(): Promise<DailyGame> {
+    const response = await fetch("./data/daily-game.json", {
+        cache: "no-cache"
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to load daily game: ${response.status}`);
+    }
+
+    const game = await response.json() as DailyGame;
+
+    if (
+        typeof game.date !== "string" ||
+        typeof game.start !== "string" ||
+        typeof game.goal !== "string" ||
+        typeof game.distance !== "number"
+    ) {
+        throw new Error("Invalid daily-game.json");
+    }
+
+    return game;
+}
+
+async function initializeDailyGame(): Promise<void> {
+    try {
+        dailyGame = await loadDailyGame();
+
+        if (startPageElement) {
+            startPageElement.textContent = dailyGame.start;
+        }
+
+        if (endPageElement) {
+            endPageElement.textContent = dailyGame.goal;
+        }
+
+        console.log(`Daily game loaded: ${dailyGame.start} → ${dailyGame.goal}`);
+    } catch (error) {
+        console.error("Failed to load daily game:", error);
+
+        if (startPageElement) {
+            startPageElement.textContent = "Unable to load";
+        }
+
+        if (endPageElement) {
+            endPageElement.textContent = "today's game";
+        }
+    }
+}
 
 export async function startGame(): Promise<void> {
     if (!startScreen || !gameScreen || !wikipediaContainer || !tableOfContents || !pathContainer || !stepCount || !backButton || !forwardButton) {
-    return;
+        return;
     }
 
-    const startPage = startPageElement?.textContent?.trim() || "Albert Einstein";
+    if (!dailyGame) {
+        await initializeDailyGame();
+    }
+
+    if (!dailyGame) {
+        console.error("Cannot start game: daily game unavailable.");
+        return;
+    }
+
+    const startPage = dailyGame.start;
 
     navigation = createNavigation(startPage);
     clicks = 0;
+
+    if (clickCount) {
+        clickCount.textContent = "0";
+    }
 
     startScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
@@ -64,12 +136,14 @@ export async function startGame(): Promise<void> {
 
     loading = true;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
     await loadWikipediaPage(startPage, wikipediaContainer, handleNewPage);
+
     buildTableOfContents(wikipediaContainer, tableOfContents);
+
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
-
 
 async function handleNewPage(title: string): Promise<void> {
     if (!wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
@@ -78,29 +152,37 @@ async function handleNewPage(title: string): Promise<void> {
 
     addPage(navigation, title);
     clicks++;
+
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
+    }
+
     updatePath();
 
     const cur = title.trim().toLowerCase();
-    const goal = endPageElement?.textContent?.trim().toLowerCase();
+    const goal = dailyGame?.goal.trim().toLowerCase();
 
     if (cur === goal) {
         completeGame();
         return;
     }
-    
+
     loading = true;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
     await loadWikipediaPage(title, wikipediaContainer, handleNewPage);
+
     buildTableOfContents(wikipediaContainer, tableOfContents);
+
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
-
 
 function updatePath(): void {
     if (!navigation || !pathContainer || !stepCount || !backButton || !forwardButton) {
         return;
     }
+
     updatePathDisplay(navigation, pathContainer, stepCount);
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
@@ -119,97 +201,124 @@ function stopTimer(): void {
     }
 }
 
-function updateTimer(): void { 
-    if (!timer) { return; } 
-    timer.textContent = formatTime(getElapsedTime()); 
+function updateTimer(): void {
+    if (!timer) {
+        return;
+    }
+
+    timer.textContent = formatTime(getElapsedTime());
 }
 
 async function navigateBack(): Promise<void> {
-    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
+    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton || loading) {
         return;
     }
-    clicks++;
+
     const page = goBack(navigation);
+
     if (!page) {
         return;
+    }
+
+    clicks++;
+
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
     }
 
     updatePath();
 
     loading = true;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
     await loadWikipediaPage(page, wikipediaContainer, handleNewPage);
+
     buildTableOfContents(wikipediaContainer, tableOfContents);
+
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
 
 async function navigateForward(): Promise<void> {
-    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
+    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton || loading) {
         return;
     }
-    clicks++;
+
     const page = goForward(navigation);
+
     if (!page) {
         return;
     }
 
+    clicks++;
+
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
+    }
+
     updatePath();
-    
+
     loading = true;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
     await loadWikipediaPage(page, wikipediaContainer, handleNewPage);
+
     buildTableOfContents(wikipediaContainer, tableOfContents);
+
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
 
 function completeGame(): void {
-  console.log("game completed.");
+    console.log("game completed.");
 
-  stopTimer();
+    stopTimer();
 
-  if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList) {
-    console.log("completion elements missing");
-    return;
-  }
+    if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList || !completionShortestPath) {
+        console.log("completion elements missing");
+        return;
+    }
 
-  const pathLength = navigation.history.length - 1;
-  const finalTime = getElapsedTime();
+    const pathLength = navigation.history.length - 1;
+    const finalTime = getElapsedTime();
 
-  completionPathLength.textContent = String(pathLength);
-  completionClicks.textContent = String(clicks);
-  completionTime.textContent = formatTime(finalTime);
+    completionPathLength.textContent = String(pathLength);
+    completionClicks.textContent = String(clicks);
+    completionTime.textContent = formatTime(finalTime);
+    completionShortestPath.textContent = String(dailyGame?.distance ?? "?");
 
-  completionPathList.innerHTML = "";
+    completionPathList.innerHTML = "";
 
-  navigation.history.forEach((page, index) => {
-    const item = document.createElement("div");
-    item.className = "completion-path-item";
-    item.textContent = `${index + 1}. ${page}`;
-    completionPathList.appendChild(item);
-  });
+    navigation.history.forEach((page, index) => {
+        const item = document.createElement("div");
+        item.className = "completion-path-item";
+        item.textContent = `${index + 1}. ${page}`;
+        completionPathList.appendChild(item);
+    });
 
-  completionScreen.classList.remove("hidden");
+    completionScreen.classList.remove("hidden");
 }
 
 function getElapsedTime(): number {
-  if (!startTime) {
-    return 0;
-  }
-  return Date.now() - startTime;
+    if (!startTime) {
+        return 0;
+    }
+
+    return Date.now() - startTime;
 }
 
 function formatTime(milliseconds: number): string {
-  const totalSeconds =Math.floor(milliseconds / 1000);
-  const minutes =Math.floor(totalSeconds / 60);
-  const seconds =totalSeconds % 60;
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
 
-  return (
-    `${String(minutes).padStart(2, "0")}:` +
-    `${String(seconds).padStart(2, "0")}`
-  );
+    return (
+        `${String(minutes).padStart(2, "0")}:` +
+        `${String(seconds).padStart(2, "0")}`
+    );
 }
 
 backButton?.addEventListener("click", navigateBack);
 forwardButton?.addEventListener("click", navigateForward);
+
+initializeDailyGame();
