@@ -50,7 +50,7 @@ export function updatePathDisplay(navigation, pathContainer, stepCount) {
     const steps = navigation.currentIndex;
     stepCount.textContent = `${steps} ${steps === 1 ? "step" : "steps"}`;
 }
-export function updateNavigationButtons(navigation, backButton, forwardButton) {
-    backButton.disabled = !canGoBack(navigation);
-    forwardButton.disabled = !canGoForward(navigation);
+export function updateNavigationButtons(navigation, backButton, forwardButton, loading) {
+    backButton.disabled = loading || !canGoBack(navigation);
+    forwardButton.disabled = loading || !canGoForward(navigation);
 }

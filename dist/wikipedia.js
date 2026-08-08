@@ -20,7 +20,6 @@ export async function fetchWikipediaPage(title) {
 }
 function cleanWikipediaHTML(html) {
     const document = new DOMParser().parseFromString(html, "text/html");
-    // Remove links from images, but keep the images.
     document.querySelectorAll("a.image").forEach(link => {
         const image = link.querySelector("img");
         if (image) {
@@ -75,7 +74,6 @@ function processWikipediaLinks(container, onPageSelected) {
         if (!href) {
             return;
         }
-        // Images should not be clickable.
         if (link.querySelector("img")) {
             const image = link.querySelector("img");
             if (image) {
@@ -83,7 +81,6 @@ function processWikipediaLinks(container, onPageSelected) {
             }
             return;
         }
-        // Valid Wikipedia article.
         if (isValidWikipediaLink(link)) {
             const title = decodeURIComponent(href.substring("/wiki/".length)).replace(/_/g, " ");
             const button = document.createElement("button");
@@ -96,12 +93,11 @@ function processWikipediaLinks(container, onPageSelected) {
             link.replaceWith(button);
             return;
         }
-        // Invalid link becomes plain text.
         link.replaceWith(document.createTextNode(link.textContent || ""));
     });
 }
 export async function loadWikipediaPage(title, container, onPageSelected) {
-    container.innerHTML = "<p>Loading...</p>";
+    container.innerHTML = "Loading...";
     try {
         const html = await fetchWikipediaPage(title);
         container.innerHTML = html;
@@ -109,6 +105,6 @@ export async function loadWikipediaPage(title, container, onPageSelected) {
     }
     catch (error) {
         console.error(error);
-        container.innerHTML = `<p>Unable to load this Wikipedia page.</p>`;
+        container.innerHTML = "Unable to load this Wikipedia page.";
     }
 }

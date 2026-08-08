@@ -10,31 +10,24 @@ export async function fetchWikipediaPage(title: string): Promise<string> {
     origin: "*"
   });
 
-  const response = await fetch(
-    `${WIKIPEDIA_API}?${params}`
-  );
+  const response = await fetch(`${WIKIPEDIA_API}?${params}`);
+
   if (!response.ok) {
-    throw new Error(
-      `Wikipedia request failed: ${response.status}`
-    );
+    throw new Error(`Wikipedia request failed: ${response.status}`);
   }
 
   const data = await response.json();
+
   if (!data.parse?.text) {
-    throw new Error(
-      `Wikipedia page not found: ${title}`
-    );
+    throw new Error(`Wikipedia page not found: ${title}`);
   }
+
   return cleanWikipediaHTML(data.parse.text);
 }
 
 function cleanWikipediaHTML(html: string): string {
-  const document = new DOMParser().parseFromString(
-    html,
-    "text/html"
-  );
+  const document = new DOMParser().parseFromString(html, "text/html");
 
-  // Remove links from images, but keep the images.
   document.querySelectorAll("a.image").forEach(link => {
     const image = link.querySelector("img");
 
@@ -44,21 +37,23 @@ function cleanWikipediaHTML(html: string): string {
       link.remove();
     }
   });
+
   return document.body.innerHTML;
 }
 
 function isValidWikipediaLink(link: HTMLAnchorElement): boolean {
   const href = link.getAttribute("href");
+
   if (!href || !href.startsWith("/wiki/")) {
     return false;
   }
+
   if (href.includes("#") || href.includes("?")) {
     return false;
   }
 
-  const title = decodeURIComponent(
-    href.substring("/wiki/".length)
-  ).replace(/_/g, " ");
+  const title = decodeURIComponent(href.substring("/wiki/".length)).replace(/_/g, " ");
+
   if (!title) {
     return false;
   }
@@ -86,36 +81,37 @@ function isValidWikipediaLink(link: HTMLAnchorElement): boolean {
     "Wiktionary:"
   ];
 
-  return !blockedNamespaces.some(namespace =>title.startsWith(namespace));
+  return !blockedNamespaces.some(namespace => title.startsWith(namespace));
 }
 
 function processWikipediaLinks(container: HTMLElement, onPageSelected: (title: string) => void): void {
-  const links =container.querySelectorAll<HTMLAnchorElement>("a[href]");
+  const links = container.querySelectorAll<HTMLAnchorElement>("a[href]");
+
   links.forEach(link => {
     const href = link.getAttribute("href");
+
     if (!href) {
       return;
     }
 
-    // Images should not be clickable.
     if (link.querySelector("img")) {
       const image = link.querySelector("img");
+
       if (image) {
         link.replaceWith(image);
       }
+
       return;
     }
 
-    // Valid Wikipedia article.
     if (isValidWikipediaLink(link)) {
-      const title = decodeURIComponent(
-        href.substring("/wiki/".length)
-      ).replace(/_/g, " ");
+      const title = decodeURIComponent(href.substring("/wiki/".length)).replace(/_/g, " ");
 
       const button = document.createElement("button");
       button.type = "button";
       button.className = "wiki-link";
       button.textContent = link.textContent || title;
+
       button.addEventListener("click", () => {
         onPageSelected(title);
       });
@@ -124,24 +120,25 @@ function processWikipediaLinks(container: HTMLElement, onPageSelected: (title: s
       return;
     }
 
-    // Invalid link becomes plain text.
-    link.replaceWith(
-      document.createTextNode(link.textContent || "")
-    );
+    link.replaceWith(document.createTextNode(link.textContent || ""));
   });
 }
 
-export async function loadWikipediaPage( title: string, container: HTMLElement, onPageSelected: (title: string) => void): Promise<void> {
-  container.innerHTML = "<p>Loading...</p>";
+
+export async function loadWikipediaPage(
+  title: string,
+  container: HTMLElement,
+  onPageSelected: (title: string) => void
+): Promise<void> {
+  container.innerHTML = "Loading...";
+
   try {
     const html = await fetchWikipediaPage(title);
+
     container.innerHTML = html;
-    processWikipediaLinks(
-      container,
-      onPageSelected
-    );
+    processWikipediaLinks(container, onPageSelected);
   } catch (error) {
     console.error(error);
-    container.innerHTML = `<p>Unable to load this Wikipedia page.</p>`;
+    container.innerHTML = "Unable to load this Wikipedia page.";
   }
 }

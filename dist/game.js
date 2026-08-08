@@ -1,14 +1,16 @@
 import { loadWikipediaPage } from "./wikipedia.js";
 import { createNavigation, addPage, goBack, goForward, updatePathDisplay, updateNavigationButtons } from "./navigation.js";
+import { buildTableOfContents } from "./toc.js";
 let startTime = 0;
 let timerInterval = null;
 let clicks = 0;
 let navigation;
+let loading = false;
 const startScreen = document.querySelector("#start-screen");
 const gameScreen = document.querySelector("#game-screen");
+const tableOfContents = document.querySelector("#table-of-contents");
 const wikipediaContainer = document.querySelector("#wikipedia-container");
 const pathContainer = document.querySelector("#path");
-const gameContent = document.querySelector("#game-content");
 const stepCount = document.querySelector("#step-count");
 const backButton = document.querySelector("#back-button");
 const forwardButton = document.querySelector("#forward-button");
@@ -21,8 +23,8 @@ const completionPathLength = document.querySelector("#completion-path-length");
 const completionClicks = document.querySelector("#completion-clicks");
 const completionTime = document.querySelector("#completion-time");
 const completionPathList = document.querySelector("#completion-path-list");
-export function startGame() {
-    if (!startScreen || !gameScreen || !wikipediaContainer || !pathContainer || !stepCount || !backButton || !forwardButton) {
+export async function startGame() {
+    if (!startScreen || !gameScreen || !wikipediaContainer || !tableOfContents || !pathContainer || !stepCount || !backButton || !forwardButton) {
         return;
     }
     const startPage = startPageElement?.textContent?.trim() || "Albert Einstein";
@@ -32,10 +34,15 @@ export function startGame() {
     gameScreen.classList.remove("hidden");
     updatePath();
     startTimer();
-    loadWikipediaPage(startPage, wikipediaContainer, handleNewPage);
+    loading = true;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
+    await loadWikipediaPage(startPage, wikipediaContainer, handleNewPage);
+    buildTableOfContents(wikipediaContainer, tableOfContents);
+    loading = false;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
-function handleNewPage(title) {
-    if (!wikipediaContainer) {
+async function handleNewPage(title) {
+    if (!wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
         return;
     }
     addPage(navigation, title);
@@ -43,19 +50,23 @@ function handleNewPage(title) {
     updatePath();
     const cur = title.trim().toLowerCase();
     const goal = endPageElement?.textContent?.trim().toLowerCase();
-    console.log(cur + " | " + goal);
     if (cur === goal) {
         completeGame();
         return;
     }
-    loadWikipediaPage(title, wikipediaContainer, handleNewPage);
+    loading = true;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
+    await loadWikipediaPage(title, wikipediaContainer, handleNewPage);
+    buildTableOfContents(wikipediaContainer, tableOfContents);
+    loading = false;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
 function updatePath() {
     if (!navigation || !pathContainer || !stepCount || !backButton || !forwardButton) {
         return;
     }
     updatePathDisplay(navigation, pathContainer, stepCount);
-    updateNavigationButtons(navigation, backButton, forwardButton);
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
 function startTimer() {
     stopTimer();
@@ -75,8 +86,8 @@ function updateTimer() {
     }
     timer.textContent = formatTime(getElapsedTime());
 }
-function navigateBack() {
-    if (!navigation || !wikipediaContainer) {
+async function navigateBack() {
+    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
         return;
     }
     clicks++;
@@ -85,10 +96,15 @@ function navigateBack() {
         return;
     }
     updatePath();
-    loadWikipediaPage(page, wikipediaContainer, handleNewPage);
+    loading = true;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
+    await loadWikipediaPage(page, wikipediaContainer, handleNewPage);
+    buildTableOfContents(wikipediaContainer, tableOfContents);
+    loading = false;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
-function navigateForward() {
-    if (!navigation || !wikipediaContainer) {
+async function navigateForward() {
+    if (!navigation || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
         return;
     }
     clicks++;
@@ -97,7 +113,12 @@ function navigateForward() {
         return;
     }
     updatePath();
-    loadWikipediaPage(page, wikipediaContainer, handleNewPage);
+    loading = true;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
+    await loadWikipediaPage(page, wikipediaContainer, handleNewPage);
+    buildTableOfContents(wikipediaContainer, tableOfContents);
+    loading = false;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
 }
 function completeGame() {
     console.log("game completed.");

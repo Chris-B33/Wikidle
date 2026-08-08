@@ -65,7 +65,7 @@ export function updatePathDisplay(navigation: Navigation, pathContainer: HTMLEle
   stepCount.textContent =`${steps} ${steps === 1 ? "step" : "steps"}`;
 }
 
-export function updateNavigationButtons(navigation: Navigation,backButton: HTMLButtonElement,forwardButton: HTMLButtonElement): void {
-  backButton.disabled = !canGoBack(navigation);
-  forwardButton.disabled = !canGoForward(navigation);
+export function updateNavigationButtons(navigation: Navigation,backButton: HTMLButtonElement,forwardButton: HTMLButtonElement, loading: boolean): void {
+  backButton.disabled = loading || !canGoBack(navigation);
+  forwardButton.disabled = loading || !canGoForward(navigation);
 }
