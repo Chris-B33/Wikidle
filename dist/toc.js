@@ -17,9 +17,16 @@ export function buildTableOfContents(wikipediaContainer, tableOfContents) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = `toc-item toc-level-${level}`;
+        button.dataset.target = id;
         button.textContent = `${number}. ${heading.textContent?.trim() || "Untitled section"}`;
         button.addEventListener("click", () => {
-            heading.scrollIntoView({ behavior: "smooth", block: "start" });
+            const containerTop = wikipediaContainer.getBoundingClientRect().top;
+            const headingTop = heading.getBoundingClientRect().top;
+            const scrollPosition = wikipediaContainer.scrollTop + (headingTop - containerTop) - 20;
+            wikipediaContainer.scrollTo({
+                top: scrollPosition,
+                behavior: "smooth"
+            });
         });
         tableOfContents.appendChild(button);
         console.log("Added TOC item:", button.textContent);
