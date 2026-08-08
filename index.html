@@ -6,7 +6,7 @@
 
     <title>Wikidle</title>
 
-    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="./src/styles.css">
   </head>
 
   <body>
@@ -43,7 +43,7 @@
 
         <div class="goal goal-end">
           <span class="goal-label">GOAL</span>
-          <span id="end-page" class="page-name">World War II</span>
+          <span id="end-page" class="page-name">Quantum mechanics</span>
         </div>
 
         <div class="timer">
@@ -59,36 +59,55 @@
           </div>
 
           <div id="wikipedia-container" class="wikipedia-container">
-            <!-- Wikipedia article will be inserted here -->
+            <!-- Wikipedia article -->
           </div>
 
           <div class="navigation-buttons">
-            <button id="back-button" class="nav-button" disabled>
-              ← Back
-            </button>
-
-            <button id="forward-button" class="nav-button" disabled>
-              Forward →
-            </button>
+            <button id="back-button" class="nav-button" disabled>← Back</button>
+            <button id="forward-button" class="nav-button" disabled>Forward →</button>
           </div>
         </section>
-
 
         <section class="game-card path-card">
           <div class="card-header">
             <h2>Your Path</h2>
-            <span id="step-count">1 step</span>
+            <span id="step-count">0 steps</span>
           </div>
 
-          <div id="path" class="path-list">
-            <div class="path-item current">
-              <span class="path-number">1</span>
-              <span class="path-page">Albert Einstein</span>
-            </div>
-          </div>
+          <div id="path" class="path-list"></div>
         </section>
       </div>
     </main>
+
+    <section id="completion-screen" class="completion-screen hidden">
+      <div class="completion-overlay"></div>
+
+      <div class="completion-card">
+        <h2>You Win!</h2>
+
+        <div class="completion-stats">
+          <div class="completion-stat">
+            <span class="stat-label">PATH LENGTH</span>
+            <strong id="completion-path-length">0</strong>
+          </div>
+
+          <div class="completion-stat">
+            <span class="stat-label">CLICKS</span>
+            <strong id="completion-clicks">0</strong>
+          </div>
+
+          <div class="completion-stat">
+            <span class="stat-label">TIME</span>
+            <strong id="completion-time">00:00</strong>
+          </div>
+        </div>
+
+        <div class="completion-path">
+          <span class="stat-label">PATH TAKEN</span>
+          <div id="completion-path-list"></div>
+        </div>
+      </div>
+    </section>
 
     <script type="module" src="./dist/main.js"></script>
   </body>
