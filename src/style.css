@@ -500,7 +500,6 @@ body {
 }
 
 /* MOBILE SCROLL OVERRIDE */
-
 @media (max-width: 700px) {
   html,
   body {
@@ -520,11 +519,25 @@ body {
   }
 
   .game-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
     height: auto;
     overflow: visible;
   }
 
+  .toc-card {
+    height: auto;
+    overflow: hidden;
+  }
+
+  .table-of-contents {
+    height: 180px;
+    overflow-y: auto;
+  }
+
   .wikipedia-card {
+    min-width: 0;
     height: auto;
     overflow: hidden;
   }
@@ -536,21 +549,19 @@ body {
     overflow-y: auto;
   }
 
-  .toc-card {
-    height: auto;
-  }
-
-  .table-of-contents {
-    height: 180px;
-    overflow-y: auto;
-  }
-
   .path-card {
     height: auto;
+    overflow: hidden;
   }
 
   .path-list {
     height: 150px;
     overflow-y: auto;
+  }
+}
+
+@media (max-width: 400px) {
+  .wikipedia-container {
+    height: 380px;
   }
 }
