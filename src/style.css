@@ -43,7 +43,7 @@ body {
   min-height: 100vh;
   font-family: Arial, sans-serif;
   color: #292722;
-  background: linear-gradient(135deg, #eee8dc, #f1eadf);
+  background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.5), transparent 35%), #cdc2ae;
 }
 
 .site-header {
@@ -157,7 +157,6 @@ body {
 .page-name {
   display: block;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: bold;
 }
