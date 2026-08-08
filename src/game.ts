@@ -23,6 +23,16 @@ interface DailyGame {
     distance: number;
 }
 
+interface SavedGame {
+    date: string;
+    completed: boolean;
+    pathLength: number;
+    shortestPath: number;
+    clicks: number;
+    time: number;
+    path: string[];
+}
+
 let startTime = 0;
 let timerInterval: number | null = null;
 let clicks = 0;
@@ -105,6 +115,27 @@ async function initializeDailyGame(): Promise<void> {
     }
 }
 
+function saveGame(completed: boolean = false): void {
+    if (!dailyGame || !navigation) {
+        return;
+    }
+
+    const game: SavedGame = {
+        date: dailyGame.date,
+        completed,
+        pathLength: navigation.history.length - 1,
+        shortestPath: dailyGame.distance,
+        clicks,
+        time: completed ? getElapsedTime() : getElapsedTime(),
+        path: [...navigation.history]
+    };
+
+    localStorage.setItem(
+        `wikidle-game-${dailyGame.date}`,
+        JSON.stringify(game)
+    );
+}
+
 export async function startGame(): Promise<void> {
     if (!startScreen || !gameScreen || !wikipediaContainer || !tableOfContents || !pathContainer || !stepCount || !backButton || !forwardButton) {
         return;
@@ -176,6 +207,8 @@ async function handleNewPage(title: string): Promise<void> {
 
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
+    saveGame();
 }
 
 function updatePath(): void {
@@ -237,6 +270,8 @@ async function navigateBack(): Promise<void> {
 
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
+    saveGame();
 }
 
 async function navigateForward(): Promise<void> {
@@ -267,6 +302,8 @@ async function navigateForward(): Promise<void> {
 
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
+    saveGame();
 }
 
 function completeGame(): void {
@@ -274,7 +311,7 @@ function completeGame(): void {
 
     stopTimer();
 
-    if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList || !completionShortestPath) {
+    if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList || !completionShortestPath || !dailyGame) {
         console.log("completion elements missing");
         return;
     }
@@ -297,6 +334,8 @@ function completeGame(): void {
     });
 
     completionScreen.classList.remove("hidden");
+
+    saveGame(true);
 }
 
 function getElapsedTime(): number {
@@ -318,7 +357,99 @@ function formatTime(milliseconds: number): string {
     );
 }
 
+function showPreviousResult(result: SavedGame): void {
+    if (!completionScreen || !completionPathLength || !completionClicks || !completionTime || !completionPathList || !completionShortestPath) {
+        return;
+    }
+
+    completionPathLength.textContent = String(result.pathLength);
+    completionShortestPath.textContent = String(result.shortestPath);
+    completionClicks.textContent = String(result.clicks);
+    completionTime.textContent = formatTime(result.time);
+
+    completionPathList.innerHTML = "";
+
+    result.path.forEach((page, index) => {
+        const item = document.createElement("div");
+        item.className = "completion-path-item";
+        item.textContent = `${index + 1}. ${page}`;
+        completionPathList.appendChild(item);
+    });
+
+    completionScreen.classList.remove("hidden");
+}
+
+async function loadGame(): Promise<void> {
+    await initializeDailyGame();
+
+    if (!dailyGame) {
+        console.error("Cannot load game: daily game unavailable.");
+        return;
+    }
+
+    const saved = localStorage.getItem(`wikidle-game-${dailyGame.date}`);
+
+    if (!saved) {
+        return;
+    }
+
+    try {
+        const result: SavedGame = JSON.parse(saved);
+
+        if (result.completed) {
+            startScreen?.classList.add("hidden");
+            gameScreen?.classList.add("hidden");
+            showPreviousResult(result);
+            return;
+        }
+
+        console.log("Restoring unfinished game...");
+
+        startScreen?.classList.add("hidden");
+        gameScreen?.classList.remove("hidden");
+
+        await restoreGame(result);
+    } catch (error) {
+        console.error("Failed to restore saved game:", error);
+        localStorage.removeItem(`wikidle-game-${dailyGame.date}`);
+    }
+}
+
+async function restoreGame(saved: SavedGame): Promise<void> {
+    if (!dailyGame || !wikipediaContainer || !tableOfContents || !backButton || !forwardButton) {
+        return;
+    }
+
+    navigation = createNavigation(saved.path[0]);
+    clicks = saved.clicks;
+
+    for (let i = 1; i < saved.path.length; i++) {
+        addPage(navigation, saved.path[i]);
+    }
+
+    if (clickCount) {
+        clickCount.textContent = String(clicks);
+    }
+
+    updatePath();
+
+    startTime = Date.now() - saved.time;
+    updateTimer();
+    timerInterval = window.setInterval(updateTimer, 1000);
+
+    const currentPage = navigation.history[navigation.history.length - 1];
+
+    loading = true;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
+
+    await loadWikipediaPage(currentPage, wikipediaContainer, handleNewPage);
+    buildTableOfContents(wikipediaContainer, tableOfContents);
+
+    loading = false;
+    updateNavigationButtons(navigation, backButton, forwardButton, loading);
+}
+
+loadGame();
+
 backButton?.addEventListener("click", navigateBack);
 forwardButton?.addEventListener("click", navigateForward);
-
-initializeDailyGame();
