@@ -500,77 +500,55 @@ body {
 }
 
 /* MOBILE SCROLL OVERRIDE */
-
 @media screen and (max-width: 700px) {
-  html,
-  body {
-    height: auto !important;
-    min-height: 100%;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-
-  .game-screen {
-    width: calc(100% - 20px);
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 auto;
-    padding: 20px 0 40px;
-    overflow: visible !important;
-  }
-
   .game-content {
     display: flex !important;
     flex-direction: column !important;
-    width: 100%;
-    height: auto !important;
-    gap: 16px;
-    overflow: visible !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    width: 100% !important;
   }
 
-  .game-content > .game-card {
-    width: 100%;
-    min-width: 0;
-    margin: 0;
+  .game-content .toc-card,
+  .game-content .wikipedia-card,
+  .game-content .path-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
   }
 
-  .toc-card {
-    order: 1;
-    height: auto !important;
-  }
-
-  .wikipedia-card {
-    order: 2;
-    height: auto !important;
-    overflow: hidden;
-  }
-
-  .path-card {
-    order: 3;
+  .game-content .toc-card {
     height: auto !important;
   }
 
-  .table-of-contents {
+  .game-content .wikipedia-card {
+    height: auto !important;
+  }
+
+  .game-content .path-card {
+    height: auto !important;
+  }
+
+  .game-content .table-of-contents {
     height: 180px;
-    overflow-y: auto;
   }
 
-  .wikipedia-container {
-    width: 100%;
+  .game-content .wikipedia-container {
     height: 500px !important;
-    max-height: none !important;
-    overflow-x: auto;
     overflow-y: auto;
+    overflow-x: auto;
   }
 
-  .path-list {
+  .game-content .path-list {
     height: 150px;
     overflow-y: auto;
   }
 }
 
 @media screen and (max-width: 400px) {
-  .wikipedia-container {
+  .game-content .wikipedia-container {
     height: 380px !important;
   }
 }
