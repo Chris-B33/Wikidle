@@ -26,6 +26,7 @@
           Jump through Wikipedia from one article to another.<br>
           Find the shortest path you can between those two specific articles.<br>
           Every daily puzzle is solvable in 2-6 links.
+          Hovering over either goal will give a short description of it.
         </p>
         <button id="start-button" class="start-button">Start Game</button>
       </div>
@@ -36,16 +37,22 @@
     ----------------->
     <main id="game-screen" class="game-screen hidden">
       <section class="game-card goals-card">
-        <div class="goal">
+        <div class="goal goal-start">
           <span class="goal-label">START</span>
-          <span id="start-page" class="page-name">Albert Einstein</span>
+          <span id="start-page" class="page-name">Start Goal</span>
+          <section class="goal-description">
+            <p>Description</p>
+          </section>
         </div>
 
         <div class="goal-arrow" aria-hidden="true">→</div>
 
         <div class="goal goal-end">
           <span class="goal-label">GOAL</span>
-          <span id="end-page" class="page-name">Quantum mechanics</span>
+          <span id="end-page" class="page-name">End Goal</span>
+          <section class="goal-description">
+            <p>Description</p>
+          </section>
         </div>
 
         <div class="timer">

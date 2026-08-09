@@ -180,6 +180,123 @@ body {
 
 
 /* =========================================================
+GOAL DESCRIPTIONS
+========================================================= */
+
+.goal {
+  position: relative;
+}
+
+.goal-description {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 100;
+  width: 280px;
+  padding: 12px 14px;
+  background: #fffefa;
+  border: 1px solid #ddd8cf;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(41, 39, 34, 0.15);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  pointer-events: none;
+}
+
+.goal-description p {
+  margin: 0;
+  color: #777064;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.goal:hover .goal-description {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.goal-start .goal-description { left: 0; } /* End popup sticks to the right */ 
+.goal-end .goal-description { right: 0; }
+
+/* Mobile: descriptions are hidden until toggled by JavaScript */
+@media screen and (max-width: 700px) {
+  .goal-description {
+    position: absolute;
+    width: 90%;
+    margin-top: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: none;
+    pointer-events: none;
+  }
+
+  .goal.description-visible .goal-description {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .goal:hover .goal-description {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .goal.description-visible:hover .goal-description {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+.goal-start,
+.goal-end {
+  cursor: help;
+}
+
+.goal-start .page-name,
+.goal-end .page-name {
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+  text-decoration-color: #aaa092;
+}
+
+.goal-start:hover .page-name,
+.goal-end:hover .page-name {
+  text-decoration-color: #777064;
+}
+
+.goal-start::after,
+.goal-end::after {
+  content: "hover for info";
+  display: block;
+  margin-top: 5px;
+  font-size: 9px;
+  color: #aaa092;
+  transition: opacity 0.15s ease;
+}
+
+.goal-start:hover::after,
+.goal-end:hover::after {
+  opacity: 1;
+}
+
+@media screen and (max-width: 700px) {
+  .goal-start::after,
+  .goal-end::after {
+    content: "tap for info";
+    opacity: 1;
+  }
+}
+
+
+/* =========================================================
    GAME CONTENT
    ========================================================= */
 

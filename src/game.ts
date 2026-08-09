@@ -65,6 +65,8 @@ const completionTime = document.querySelector<HTMLElement>("#completion-time");
 const completionShortestPath = document.querySelector<HTMLElement>("#completion-shortest-path");
 const completionPathList = document.querySelector<HTMLElement>("#completion-path-list");
 
+const goalEnd = document.querySelector(".goal-end");
+
 
 async function loadDailyGame(): Promise<DailyGame> {
     const response = await fetch("./data/daily-game.json", {
@@ -100,6 +102,8 @@ async function initializeDailyGame(): Promise<void> {
         if (endPageElement) {
             endPageElement.textContent = dailyGame.goal;
         }
+
+        setupGoalDescriptions(dailyGame.start, dailyGame.goal);
 
         console.log(`Daily game loaded: ${dailyGame.start} → ${dailyGame.goal}`);
     } catch (error) {
@@ -447,6 +451,47 @@ async function restoreGame(saved: SavedGame): Promise<void> {
 
     loading = false;
     updateNavigationButtons(navigation, backButton, forwardButton, loading);
+}
+
+async function setupGoalDescriptions(start_goal: string, end_goal: string): Promise<void> {
+  const response = await fetch("./data/article-previews.json");
+  const previews = await response.json() as Record<string, string>;
+  const goals = document.querySelectorAll(".goal");
+
+  goals.forEach(goal => {
+    const description = goal.querySelector(".goal-description");
+    const paragraph = goal.querySelector("p");
+
+    if (!description || !paragraph) {
+      return;
+    }
+
+    const title = goal.classList.contains("goal-start") ? start_goal : end_goal;
+    paragraph.textContent = previews[title] || "";
+
+    goal.addEventListener("click", () => {
+      if (window.innerWidth > 700) {
+        return;
+      }
+
+      const isOpen = goal.classList.contains("description-visible");
+
+      goals.forEach(otherGoal => {
+        otherGoal.classList.remove("description-visible");
+
+        const otherDescription = otherGoal.querySelector<HTMLElement>(".goal-description");
+
+        if (otherDescription) {
+          otherDescription.classList.add("hidden");
+        }
+      });
+
+      if (!isOpen) {
+        goal.classList.add("description-visible");
+        description.classList.remove("hidden");
+      }
+    });
+  });
 }
 
 loadGame();
