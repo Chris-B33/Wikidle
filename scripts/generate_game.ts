@@ -13,7 +13,7 @@ const OUTPUT_FILE =
   "data/daily-game.json";
 
 const MIN_DISTANCE = 4;
-const MAX_DISTANCE = 6;
+const MAX_DISTANCE = 8;
 const MAX_ATTEMPTS = 1000;
 
 interface DailyGame {
